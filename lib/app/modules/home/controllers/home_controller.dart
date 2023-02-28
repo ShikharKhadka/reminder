@@ -2,9 +2,13 @@ import 'dart:math';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
+import 'package:intl/intl_standalone.dart';
+
 import 'package:reminder/app/modules/database/notification_db.dart';
 import 'package:reminder/app/modules/model/notification_db_model.dart';
 import 'package:reminder/app/utils/date_time_component_enum.dart';
@@ -32,49 +36,50 @@ class HomeController extends GetxController {
 
   @override
   void onInit() async {
+    scrollController = ScrollController()..addListener(scrollListener);
+
     tz.initializeTimeZones();
     dateTimeComponentList = DateTimeComponentEnum.values;
     repeat = Repeat.values;
-    scrollController = ScrollController()..addListener(scrollListener);
-    await loginUser();
+
     super.onInit();
   }
 
-  Future<void> registerUser() async {
-    try {
-      final credential =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: 'shikhar12763@gmail.com',
-        password: 'password123@',
-      );
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
-      } else if (e.code == 'email-already-in-use') {
-        print('The account already exists for that email.');
-      }
-    } catch (e) {
-      print(e);
-    }
-  }
+  // Future<void> registerUser() async {
+  //   try {
+  //     final credential =
+  //         await FirebaseAuth.instance.createUserWithEmailAndPassword(
+  //       email: 'shikhar12763@gmail.com',
+  //       password: 'password123@',
+  //     );
+  //   } on FirebaseAuthException catch (e) {
+  //     if (e.code == 'weak-password') {
+  //       print('The password provided is too weak.');
+  //     } else if (e.code == 'email-already-in-use') {
+  //       print('The account already exists for that email.');
+  //     }
+  //   } catch (e) {
+  //     print(e);
+  //   }
+  // }
 
-  Future<void> loginUser() async {
-    try {
-      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: 'shikhar12763@gmail.com',
-        password: 'password123@',
-      );
-      final idToken = await credential.user!.getIdTokenResult();
-      final id = idToken.token;
-      print(id);
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        print('No user found for that email.');
-      } else if (e.code == 'wrong-password') {
-        print('Wrong password provided for that user.');
-      }
-    }
-  }
+  // Future<void> loginUser() async {
+  //   try {
+  //     final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+  //       email: 'shikhar12763@gmail.com',
+  //       password: 'password123@',
+  //     );
+  //     final idToken = await credential.user!.getIdTokenResult();
+  //     final id = idToken.token;
+  //     print(id);
+  //   } on FirebaseAuthException catch (e) {
+  //     if (e.code == 'user-not-found') {
+  //       print('No user found for that email.');
+  //     } else if (e.code == 'wrong-password') {
+  //       print('Wrong password provided for that user.');
+  //     }
+  //   }
+  // }
 
   void scrollListener() {
     FocusManager.instance.primaryFocus?.unfocus();
@@ -84,6 +89,7 @@ class HomeController extends GetxController {
     DateFormat format = DateFormat("yyyy-MM-dd hh:mm");
     var formatedDateTime = (format.parse(val));
     dateTimeList.add(formatedDateTime);
+
     update();
   }
 
@@ -139,7 +145,7 @@ class HomeController extends GetxController {
 
   dateValidation() {
     if (dateTimeList.isEmpty) {
-      Get.snackbar('title', 'message');
+      Get.snackbar('DateTime', 'Enter date time');
     } else {
       return null;
     }
@@ -163,28 +169,55 @@ class HomeController extends GetxController {
       descriptionValidation();
       dateValidation();
     } else {
-      Random random = Random();
-
-      for (int i = 0; i < dateTimeList.length; i++) {
-        int randomNumber = random.nextInt(10000);
-
-        await NotificationService().showNotification(
-            randomNumber,
-            titleEditingController.text,
-            descEditingController.text,
-            dateTimeList[i],
-            dateTimeComponents);
-        await NotificationDatabase.notificationDatabase.insertNotification({
-          'notificationId': randomNumber,
-          'dateTimeList': dateTimeList[i].toString(),
-          'title': titleEditingController.text,
-          'description': descEditingController.text
-        });
-      }
-      await getNotificationDb();
-      Get.back(result: {"notificationDbList": notificationDbList});
-      dateTimeList.clear();
-      update();
+      // Get.back(result: {"notificationDbList": notificationDbList});
+      Get.defaultDialog(
+          title: "Are you sure you want to send notification?",
+          content: Column(
+            children: [
+              Text(titleEditingController.text),
+              Text(descEditingController.text),
+              for (var i in dateTimeList)
+                Text(DateFormat('EEEE, d MMM, yyyy hh:mm a ')
+                    .format(DateTime.parse(i.toString())))
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () async {
+                Get.back();
+              },
+              child: const Text('Edit'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Random random = Random();
+                for (int i = 0; i < dateTimeList.length; i++) {
+                  int randomNumber = random.nextInt(10000);
+                  await NotificationService().showNotification(
+                      randomNumber,
+                      titleEditingController.text,
+                      descEditingController.text,
+                      dateTimeList[i],
+                      dateTimeComponents);
+                  await NotificationDatabase.notificationDatabase
+                      .insertNotification({
+                    'notificationId': randomNumber,
+                    'dateTimeList': dateTimeList[i].toString(),
+                    'title': titleEditingController.text,
+                    'description': descEditingController.text
+                  });
+                }
+                await getNotificationDb();
+                dateTimeList.clear();
+                update();
+                Get.back(
+                    result: {"notificationDbList": notificationDbList},
+                    closeOverlays: true);
+              },
+              child: const Text('Ok'),
+            ),
+          ],
+          radius: 30);
     }
   }
 

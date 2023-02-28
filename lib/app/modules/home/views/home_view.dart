@@ -2,6 +2,7 @@ import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:reminder/app/utils/app_theme.dart';
 
 import '../controllers/home_controller.dart';
@@ -110,11 +111,14 @@ class HomeView extends StatelessWidget {
                         padding: const EdgeInsets.only(right: 10, left: 20),
                         child: DateTimePicker(
                           type: DateTimePickerType.dateTime,
-                          dateMask: 'yMMMMd     hh:mm',
+
                           initialValue: DateTime.now().toString(),
                           firstDate: DateTime(2000),
                           lastDate: DateTime(2100),
                           icon: const Icon(Icons.event),
+                          // dateMask: 'd MMM, yyyy',
+                          use24HourFormat: true,
+
                           dateLabelText: 'Date',
                           timeLabelText: "Hour",
                           textAlign: TextAlign.center,
@@ -168,16 +172,18 @@ class HomeView extends StatelessWidget {
                             children: List.generate(
                               controller.dateTimeList.length,
                               (index) => Container(
-                                height: 30,
                                 width: MediaQuery.of(context).size.width * 0.45,
                                 decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(color: Colors.black)),
+                                  borderRadius: BorderRadius.circular(20),
+                                  border: Border.all(color: Colors.black),
+                                ),
                                 child: Center(
-                                  child: Text(
-                                    controller.dateTimeList[index]
-                                        .toString()
-                                        .substring(0, 16),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(DateFormat.yMMMMEEEEd()
+                                        .add_jm()
+                                        .format(
+                                            controller.dateTimeList[index])),
                                   ),
                                 ),
                               ),

@@ -17,6 +17,7 @@ class RegisterController extends GetxController {
     // registerUser();
     super.onInit();
   }
+
   Future<void> registerUser() async {
     try {
       final credential =
@@ -34,13 +35,15 @@ class RegisterController extends GetxController {
       print(e);
     }
   }
-  String onChanged(String value) {
-    // if (value.isEmpty) {
-    //   value = "Enter e-mail";
-    //   return value;
-    // }
-    return value;
-  }
+
+  // String onChanged(String value) {
+  //   // if (value.isEmpty) {
+  //   //   value = "Enter e-mail";
+  //   //   return value;
+  //   // }
+  //   return value;
+  // }
+
   emailValidation() {
     if (emailEditingController.text.isEmpty) {
       emailErrorText = 'Empty Email address';
@@ -57,6 +60,7 @@ class RegisterController extends GetxController {
       update();
     }
   }
+
   passwordValidation() {
     if (passwordEditingController.text.isEmpty) {
       passwordErrorText = 'Empty Password';
@@ -100,9 +104,26 @@ class RegisterController extends GetxController {
       update();
     }
   }
+
   registerOnTap() {
     emailValidation();
     passwordValidation();
     confirmPasswordValidation();
+  }
+
+  onChanged(String value) {
+    if (value.isEmpty) {
+      emailErrorText = 'Empty Email address';
+      validate = true;
+      update();
+    } else if (!value.isEmail) {
+      emailErrorText = 'Invalid email address';
+      validate = true;
+      update();
+    } else {
+      validate = false;
+      emailErrorText = null;
+      update();
+    }
   }
 }

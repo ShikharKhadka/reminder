@@ -77,6 +77,7 @@ class RegisterView extends GetView<RegisterController> {
                                       value;
                                   controller.update();
                                 }),
+                                onChanged: controller.onChanged,
                               ),
                               const SizedBox(
                                 height: 10,

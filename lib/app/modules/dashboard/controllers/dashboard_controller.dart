@@ -1,34 +1,60 @@
-import 'dart:developer';
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 
 import 'package:get/get.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:reminder/app/data/google_calendar_api.dart';
-import 'package:reminder/app/data/holiday.dart';
-import 'package:reminder/app/modules/database/get_storage.dart';
-
-import 'package:reminder/app/modules/database/notification_db.dart';
-import 'package:reminder/app/routes/app_pages.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+import 'package:reminder/app/data/google_calendar_api.dart';
+import 'package:reminder/app/data/holiday.dart';
+import 'package:reminder/app/modules/database/deleted_notification_db.dart';
+import 'package:reminder/app/modules/database/notification_db.dart';
+import 'package:reminder/app/routes/app_pages.dart';
+
 import '../../model/notification_db_model.dart';
+
+enum CalendarEventType {
+  holidayNepal(displayName: "Holidays of Nepal"),
+  holidayUsa(displayName: "Holidays of USA"),
+  custom(displayName: "");
+
+  final String displayName;
+  const CalendarEventType({required this.displayName});
+}
+
+extension CalendarEventTypeX on CalendarEventType {
+  bool get isHoliday =>
+      this == CalendarEventType.holidayNepal ||
+      this == CalendarEventType.holidayUsa;
+}
+
+class CalendarEvent {
+  final String title;
+  final CalendarEventType eventType;
+  final DateTime date;
+  CalendarEvent({
+    required this.title,
+    required this.eventType,
+    required this.date,
+  });
+}
 
 class DashboardController extends GetxController {
   List<NotificationDdModel> notificationDbList = [];
   bool isLoading = false;
-  List<Holiday> holidays = [];
+  List<CalendarEvent> calendarEvents = [];
   late DateTime focusedDate;
   late DateTime selectedDate;
-  List<Holiday> selectedEvents = [];
-  late String event;
+  List<CalendarEvent> selectedEvents = [];
   late CalendarFormat calendarFormat;
+
+  List<CalendarEventType> calendarEventTypesForDay = [];
   @override
   void onInit() async {
-    await getHolidays();
-    await getNotificationDb();
     focusedDate = DateTime.now();
     selectedDate = DateTime.now();
-    onDateSelected(selectedDate, focusedDate);
     calendarFormat = CalendarFormat.month;
+    await getHolidays();
+    await getNotificationDb();
+    onDateSelected(selectedDate, focusedDate);
     super.onInit();
   }
 
@@ -36,19 +62,33 @@ class DashboardController extends GetxController {
     isLoading = true;
     try {
       // if (HolidayStorage.readHoliday.isEmpty) {
-      final results = await GoogleCalendarApi().getResult();
-      if (results != null) {
-        log(results.toString());
-        // HolidayStorage.saveHoliday(results);
-        holidays.addAll(results);
-        update();
+      final npResults = await GoogleCalendarApi().getResult(Country.nepal);
+      final usaResults = await GoogleCalendarApi().getResult(Country.america);
+      if (npResults != null && usaResults != null) {
+        for (var nepHoliday in npResults) {
+          calendarEvents.add(
+            CalendarEvent(
+              title: nepHoliday.title,
+              eventType: CalendarEventType.holidayNepal,
+              date: nepHoliday.date,
+            ),
+          );
+        }
+        for (var engHoliday in usaResults) {
+          calendarEvents.add(CalendarEvent(
+            title: engHoliday.title,
+            eventType: CalendarEventType.holidayUsa,
+            date: engHoliday.date,
+          ));
+        }
       }
+
+      calendarEvents.add(CalendarEvent(
+          title: "bhat khanu cha",
+          eventType: CalendarEventType.custom,
+          date: DateTime.now()));
       isLoading = false;
       update();
-      // }
-      // else {
-      //   holidays = HolidayStorage.readHoliday;
-      // }
     } catch (e) {
       print(e);
     }
@@ -71,6 +111,7 @@ class DashboardController extends GetxController {
 
   refreshDb() async {
     notificationDbList.clear();
+    isLoading = true;
     List<NotificationDdModel> notificationDd =
         await NotificationDatabase.notificationDatabase.queryNotification();
     if (notificationDd.isNotEmpty) {
@@ -78,6 +119,7 @@ class DashboardController extends GetxController {
       update();
       return notificationDbList;
     }
+    isLoading = false;
     update();
   }
 
@@ -88,9 +130,15 @@ class DashboardController extends GetxController {
     update();
   }
 
-  List<Holiday> eventLoader(DateTime dateTime) {
-    return holidays
+  List<CalendarEvent> eventLoader(DateTime dateTime) {
+    return calendarEvents
         .where((element) => isSameDay(dateTime, element.date))
+        .toList();
+  }
+
+  List<CalendarEvent> filterEvents({required CalendarEventType eventType}) {
+    return selectedEvents
+        .where((element) => element.eventType == eventType)
         .toList();
   }
 
@@ -100,25 +148,44 @@ class DashboardController extends GetxController {
 
   void onDateSelected(DateTime selected, DateTime focused) {
     selectedEvents.clear();
+    calendarEventTypesForDay.clear();
     selectedDate = selected;
     focusedDate = focused;
-    final eventsToday = eventLoader(selectedDate);
-    if (eventsToday.isNotEmpty) {
-      for (var element in eventsToday) {
-        selectedEvents.add(element);
-        event = element.title;
-        update();
+    selectedEvents = eventLoader(selectedDate);
+    for (var type in CalendarEventType.values) {
+      if (filterEvents(eventType: type).isNotEmpty) {
+        calendarEventTypesForDay.add(type);
       }
     }
     update();
   }
 
-  bool holidayPredict(DateTime dateTime) {
-    return holidays.any((element) => isSameDay(dateTime, element.date));
+  bool holidayPredicate(DateTime dateTime) {
+    return calendarEvents.any(
+      (event) => isSameDay(dateTime, event.date) && event.eventType.isHoliday,
+    );
   }
 
   void onFormatChange(CalendarFormat updatedCalendarFormat) {
     calendarFormat = updatedCalendarFormat;
     update();
+  }
+
+  void floatingDeletedButtonOnPressed() {
+    Get.toNamed(Routes.DELETE);
+  }
+
+  insertIntoDeletedDB(
+      {required dateTime,
+      required title,
+      required description,
+      required notificationId}) {
+    DeletedNotificationDatabase.deletednotificationDatabase
+        .insertDeletedNotification({
+      'dateTimeList': dateTime,
+      'title': title,
+      'description': description,
+      'notificationId': notificationId
+    });
   }
 }

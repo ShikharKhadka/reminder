@@ -12,6 +12,7 @@ class AppTextField extends StatelessWidget {
   final TextEditingController? controller;
   final String? currentValue;
   final String? errorText;
+  final Widget? suffixIcon;
 
   const AppTextField(
       {super.key,
@@ -22,27 +23,30 @@ class AppTextField extends StatelessWidget {
       this.currentValue,
       this.errorText,
       this.onField,
+      this.suffixIcon,
       this.onValidate});
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
-        initialValue: currentValue,
-        decoration: InputDecoration(
-          hintStyle: TextStyle(color: AppTheme.textfieldNameColor),
-          hintText: hintText,
-          errorText: errorText,
-          // validationError == null ? null : validationError!.errorText,
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Colors.grey),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: const BorderSide(color: Colors.grey),
-          ),
+      initialValue: currentValue,
+      decoration: InputDecoration(
+        hintStyle: TextStyle(color: AppTheme.textfieldNameColor),
+        hintText: hintText,
+        errorText: errorText,
+        // validationError == null ? null : validationError!.errorText,
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.grey),
         ),
-        onChanged: onChanged,
-        onFieldSubmitted: onField);
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.grey),
+        ),
+        suffixIcon: suffixIcon
+      ),
+      onChanged: onChanged,
+      onFieldSubmitted: onField,
+    );
   }
 }
