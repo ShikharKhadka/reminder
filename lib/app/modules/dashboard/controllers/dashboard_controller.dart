@@ -1,10 +1,9 @@
-import 'dart:developer';
 
+import 'package:clean_nepali_calendar/clean_nepali_calendar.dart';
 import 'package:get/get.dart';
-import 'package:permission_handler/permission_handler.dart';
+
 import 'package:reminder/app/data/google_calendar_api.dart';
 import 'package:reminder/app/data/holiday.dart';
-import 'package:reminder/app/modules/database/get_storage.dart';
 
 import 'package:reminder/app/modules/database/notification_db.dart';
 import 'package:reminder/app/routes/app_pages.dart';
@@ -16,19 +15,28 @@ class DashboardController extends GetxController {
   List<NotificationDdModel> notificationDbList = [];
   bool isLoading = false;
   List<Holiday> holidays = [];
+  List<Holiday> nepaliCalendarholidays = [];
   late DateTime focusedDate;
   late DateTime selectedDate;
   List<Holiday> selectedEvents = [];
   late String event;
   late CalendarFormat calendarFormat;
+  List<bool> selectedButton = [true, false];
+  bool showCalendar = false;
+  late NepaliDateTime neplaiCalendarSelectedDate;
+  bool nepaliCalendarOnHolidaySelected = false;
+  late NepaliCalendarController nepaliCalendarController;
+
   @override
   void onInit() async {
+    nepaliCalendarController = NepaliCalendarController();
     await getHolidays();
     await getNotificationDb();
     focusedDate = DateTime.now();
     selectedDate = DateTime.now();
-    onDateSelected(selectedDate, focusedDate);
     calendarFormat = CalendarFormat.month;
+    neplaiCalendarSelectedDate = NepaliDateTime.now();
+
     super.onInit();
   }
 
@@ -38,9 +46,9 @@ class DashboardController extends GetxController {
       // if (HolidayStorage.readHoliday.isEmpty) {
       final results = await GoogleCalendarApi().getResult();
       if (results != null) {
-        log(results.toString());
         // HolidayStorage.saveHoliday(results);
         holidays.addAll(results);
+
         update();
       }
       isLoading = false;
@@ -94,13 +102,10 @@ class DashboardController extends GetxController {
         .toList();
   }
 
-  bool selectedDatePredicate(DateTime date) {
-    return isSameDay(date, selectedDate);
-  }
-
   void onDateSelected(DateTime selected, DateTime focused) {
     selectedEvents.clear();
     selectedDate = selected;
+    update();
     focusedDate = focused;
     final eventsToday = eventLoader(selectedDate);
     if (eventsToday.isNotEmpty) {
@@ -120,5 +125,67 @@ class DashboardController extends GetxController {
   void onFormatChange(CalendarFormat updatedCalendarFormat) {
     calendarFormat = updatedCalendarFormat;
     update();
+  }
+
+  bool seletedDayPredicted(DateTime dateTime) {
+    return isSameDay(dateTime, selectedDate);
+  }
+
+  selectedButtonOnTap(int value) {
+    for (int i = 0; i < selectedButton.length; i++) {
+      // selectedButton[i] = i == value;
+      // update();
+      if (i == value) {
+        selectedButton[i] = true;
+        showCalendar = true;
+        update();
+      } else {
+        selectedButton[i] = false;
+        showCalendar = false;
+        update();
+      }
+    }
+  }
+
+  List<Holiday> nepaliEventPredict(NepaliDateTime nepaliDateTime) {
+    return holidays
+        .where((element) =>
+            isSameDay(nepaliDateTime, element.date.toNepaliDateTime()))
+        .toList();
+  }
+
+  int nepaliEventPredictListLength(NepaliDateTime nepaliDateTime) {
+    final holidayList = holidays
+        .where((element) =>
+            isSameDay(nepaliDateTime, element.date.toNepaliDateTime()))
+        .toList();
+    return holidayList.length;
+  }
+
+  bool nepaliHolidayPredict(NepaliDateTime nepaliDateTime) {
+    return holidays.any((element) =>
+        isSameDay(nepaliDateTime, element.date.toNepaliDateTime()));
+  }
+
+  onDateChanged(NepaliDateTime nepDate) {
+    selectedDate = nepDate.toDateTime();
+    neplaiCalendarSelectedDate = nepDate;
+    update();
+    nepaliCalendarholidays.clear();
+    if (nepDate.weekday == 7 ||
+        holidays.any((element) => isSameDay(
+            neplaiCalendarSelectedDate, element.date.toNepaliDateTime()))) {
+      !nepaliCalendarOnHolidaySelected;
+      update();
+    }
+    nepaliCalendarOnHolidaySelected;
+    final eventList = nepaliEventPredict(neplaiCalendarSelectedDate);
+    update();
+    if (eventList.isNotEmpty) {
+      for (var element in eventList) {
+        nepaliCalendarholidays.add(element);
+        update();
+      }
+    }
   }
 }

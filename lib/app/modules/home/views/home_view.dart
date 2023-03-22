@@ -1,11 +1,11 @@
 import 'package:date_time_picker/date_time_picker.dart';
 import 'package:flutter/material.dart';
-
 import 'package:get/get.dart';
+
 import 'package:reminder/app/utils/app_theme.dart';
+import 'package:reminder/app/utils/date_time_component_enum.dart';
 
 import '../controllers/home_controller.dart';
-import 'package:reminder/app/utils/date_time_component_enum.dart';
 
 enum TimePeriod { day, month, week, year }
 
