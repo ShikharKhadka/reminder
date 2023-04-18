@@ -30,7 +30,6 @@ class DeletedNotificationDatabase {
   initDB() async {
     var dir = await getApplicationDocumentsDirectory();
     final path = join(dir.path, 'deletedNotification.db');
-    print(path);
     return await openDatabase(path, version: 1, readOnly: false,
         onCreate: (Database db, int version) async {
       log("============Creating deleted notification table=========");

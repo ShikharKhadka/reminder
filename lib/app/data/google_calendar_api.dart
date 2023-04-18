@@ -19,7 +19,7 @@ class GoogleCalendarApi {
     var response = await baseClient.dio.get(
         '${country.code}${ApiEndpoints.holiday}',
         queryParameters: {"key": apiKey});
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 304) {
       final decodedResponse = response.data;
       final decodedHolidays = List<Holiday>.from(
         decodedResponse["items"].map(

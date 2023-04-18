@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'package:reminder/app/data/google_calendar_api.dart';
-import 'package:reminder/app/data/holiday.dart';
 import 'package:reminder/app/modules/database/deleted_notification_db.dart';
 import 'package:reminder/app/modules/database/notification_db.dart';
 import 'package:reminder/app/routes/app_pages.dart';
@@ -12,8 +11,8 @@ import 'package:reminder/app/routes/app_pages.dart';
 import '../../model/notification_db_model.dart';
 
 enum CalendarEventType {
-  holidayNepal(displayName: "Holidays of Nepal"),
-  holidayUsa(displayName: "Holidays of USA"),
+  holidayNepal(displayName: "National Holiday"),
+  holidayUsa(displayName: "International Holdiay"),
   custom(displayName: "");
 
   final String displayName;
@@ -83,10 +82,12 @@ class DashboardController extends GetxController {
         }
       }
 
-      calendarEvents.add(CalendarEvent(
-          title: "bhat khanu cha",
-          eventType: CalendarEventType.custom,
-          date: DateTime.now()));
+      // calendarEvents.add(
+      //   CalendarEvent(
+      //       title: "bhat khanu cha",
+      //       eventType: CalendarEventType.custom,
+      //       date: DateTime.now()),
+      // );
       isLoading = false;
       update();
     } catch (e) {
@@ -127,6 +128,7 @@ class DashboardController extends GetxController {
     Map<String, List<NotificationDdModel>> result =
         await Get.toNamed(Routes.home);
     result.forEach((key, value) => notificationDbList.assignAll(value));
+
     update();
   }
 
@@ -171,8 +173,15 @@ class DashboardController extends GetxController {
     update();
   }
 
-  void floatingDeletedButtonOnPressed() {
+  Future<void> floatingDeletedButtonOnPressed() async {
     Get.toNamed(Routes.DELETE);
+  }
+
+  void floatingAddEventsButtonOnPressed() async {
+    Map<String, List<CalendarEvent>> result =
+        await Get.toNamed(Routes.ADD_EVENT);
+    result.forEach((key, value) => calendarEvents.assignAll(value));
+    update();
   }
 
   insertIntoDeletedDB(

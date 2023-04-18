@@ -120,6 +120,7 @@ class DashboardView extends StatelessWidget {
                       children: controller.calendarEventTypesForDay
                           .map(
                             (eventType) => Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(eventType.displayName),
                                 ...controller
@@ -261,6 +262,20 @@ class DashboardView extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.3,
+                  child: FloatingActionButton(
+                    heroTag: null,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                    backgroundColor: AppTheme.primaryColor,
+                    onPressed: controller.floatingDeletedButtonOnPressed,
+                    child: const Text('Deleted items', maxLines: 1),
+                  ),
+                ),
+                const SizedBox(
+                  width: 10,
+                ),
                 FloatingActionButton(
                   heroTag: null,
                   backgroundColor: AppTheme.primaryColor,
@@ -271,14 +286,14 @@ class DashboardView extends StatelessWidget {
                   width: 10,
                 ),
                 SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.4,
+                  width: MediaQuery.of(context).size.width * 0.3,
                   child: FloatingActionButton(
                     heroTag: null,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10)),
                     backgroundColor: AppTheme.primaryColor,
-                    onPressed: controller.floatingDeletedButtonOnPressed,
-                    child: const Text('Deleted items', maxLines: 1),
+                    onPressed: controller.floatingAddEventsButtonOnPressed,
+                    child: const Text('Add events', maxLines: 1),
                   ),
                 ),
               ],
@@ -308,7 +323,7 @@ class EventCard extends StatelessWidget {
         decoration: BoxDecoration(
             color: Colors.white, borderRadius: BorderRadius.circular(10)),
         height: MediaQuery.of(context).size.height * 0.06,
-        width: MediaQuery.of(context).size.width * 0.6,
+        // width: MediaQuery.of(context).size.width * 0.6,
         child: Center(
           child: Text(
             title,

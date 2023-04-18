@@ -234,6 +234,9 @@ class HomeView extends StatelessWidget {
                     ),
                   ],
                 ),
+                SizedBox(
+                  height: 10,
+                ),
               ],
             ),
           ),

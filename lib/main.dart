@@ -8,7 +8,6 @@ import 'package:get_storage/get_storage.dart';
 import 'package:reminder/app/locator/locator.dart';
 
 import 'app/routes/app_pages.dart';
-import 'firebase_options.dart';
 import 'notification/notification_service.dart';
 
 void main() async {
@@ -16,9 +15,7 @@ void main() async {
   await AndroidAlarmManager.initialize();
   await GetStorage.init('holiday');
   NotificationService().initNotification();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+ 
   initLocator();
   runApp(
     GetMaterialApp(

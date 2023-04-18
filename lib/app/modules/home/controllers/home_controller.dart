@@ -45,42 +45,6 @@ class HomeController extends GetxController {
     super.onInit();
   }
 
-  // Future<void> registerUser() async {
-  //   try {
-  //     final credential =
-  //         await FirebaseAuth.instance.createUserWithEmailAndPassword(
-  //       email: 'shikhar12763@gmail.com',
-  //       password: 'password123@',
-  //     );
-  //   } on FirebaseAuthException catch (e) {
-  //     if (e.code == 'weak-password') {
-  //       print('The password provided is too weak.');
-  //     } else if (e.code == 'email-already-in-use') {
-  //       print('The account already exists for that email.');
-  //     }
-  //   } catch (e) {
-  //     print(e);
-  //   }
-  // }
-
-  // Future<void> loginUser() async {
-  //   try {
-  //     final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-  //       email: 'shikhar12763@gmail.com',
-  //       password: 'password123@',
-  //     );
-  //     final idToken = await credential.user!.getIdTokenResult();
-  //     final id = idToken.token;
-  //     print(id);
-  //   } on FirebaseAuthException catch (e) {
-  //     if (e.code == 'user-not-found') {
-  //       print('No user found for that email.');
-  //     } else if (e.code == 'wrong-password') {
-  //       print('Wrong password provided for that user.');
-  //     }
-  //   }
-  // }
-
   void scrollListener() {
     FocusManager.instance.primaryFocus?.unfocus();
   }

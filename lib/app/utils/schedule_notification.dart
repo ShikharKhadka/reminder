@@ -15,8 +15,6 @@ class ScheduleMultipleNotification {
       DateTimeComponents? dateTimeComponents,
       tz.TZDateTime? sxheduleNotification,
       DateTime? dateTime}) async {
-    Random random = Random();
-    int randomNumber = random.nextInt(10000);
     final Int64List vibrationPattern = Int64List(20);
     List.generate(20, (index) => vibrationPattern[index] = 750);
     await flutterLocalNotificationsPlugin.zonedSchedule(
