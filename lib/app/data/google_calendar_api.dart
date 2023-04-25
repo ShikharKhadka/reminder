@@ -12,6 +12,10 @@ enum Country {
 }
 
 class GoogleCalendarApi {
+  final BaseClient _baseClient;
+  GoogleCalendarApi({
+    required BaseClient baseClient,
+  }) : _baseClient = baseClient;
   BaseClient baseClient = BaseClient();
   String apiKey = 'AIzaSyD_ADwDDHZPs87g6nI42gYbH6XkBYRUtP8';
   Dio dio = Dio();

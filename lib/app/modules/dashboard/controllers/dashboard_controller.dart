@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
 import 'package:get/get.dart';
+import 'package:reminder/app/locator/locator.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'package:reminder/app/data/google_calendar_api.dart';
@@ -37,6 +38,8 @@ class CalendarEvent {
 }
 
 class DashboardController extends GetxController {
+  final GoogleCalendarApi _googleApi = locator.get<GoogleCalendarApi>();
+
   List<NotificationDdModel> notificationDbList = [];
   bool isLoading = false;
   List<CalendarEvent> calendarEvents = [];
@@ -61,8 +64,8 @@ class DashboardController extends GetxController {
     isLoading = true;
     try {
       // if (HolidayStorage.readHoliday.isEmpty) {
-      final npResults = await GoogleCalendarApi().getResult(Country.nepal);
-      final usaResults = await GoogleCalendarApi().getResult(Country.america);
+      final npResults = await _googleApi.getResult(Country.nepal);
+      final usaResults = await _googleApi.getResult(Country.america);
       if (npResults != null && usaResults != null) {
         for (var nepHoliday in npResults) {
           calendarEvents.add(
@@ -99,7 +102,6 @@ class DashboardController extends GetxController {
     isLoading = true;
     List<NotificationDdModel> notificationDd =
         await NotificationDatabase.notificationDatabase.queryNotification();
-    await Future.delayed(const Duration(seconds: 3));
     if (notificationDd.isNotEmpty) {
       notificationDbList.addAll(notificationDd);
       update();

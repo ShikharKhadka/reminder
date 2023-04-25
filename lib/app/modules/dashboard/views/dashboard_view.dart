@@ -285,17 +285,17 @@ class DashboardView extends StatelessWidget {
                 const SizedBox(
                   width: 10,
                 ),
-                SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.3,
-                  child: FloatingActionButton(
-                    heroTag: null,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                    backgroundColor: AppTheme.primaryColor,
-                    onPressed: controller.floatingAddEventsButtonOnPressed,
-                    child: const Text('Add events', maxLines: 1),
-                  ),
-                ),
+                // SizedBox(
+                //   width: MediaQuery.of(context).size.width * 0.3,
+                //   child: FloatingActionButton(
+                //     heroTag: null,
+                //     shape: RoundedRectangleBorder(
+                //         borderRadius: BorderRadius.circular(10)),
+                //     backgroundColor: AppTheme.primaryColor,
+                //     onPressed: controller.floatingAddEventsButtonOnPressed,
+                //     child: const Text('Add events', maxLines: 1),
+                //   ),
+                // ),
               ],
             ),
           ),
